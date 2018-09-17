@@ -97,12 +97,11 @@ profiles = {
 		function_name = "factor_and_speed_balanced",
 		metric = "custom"
 	},
---[[	{
+	{
 		name = "networks",
 		function_name = "factor_and_speed_networks",
 		metric = "custom"
 	},
---]]
 	{
 		name = "brussels",
 		function_name = "factor_and_speed_networks_brussels",
@@ -405,7 +404,6 @@ function factor_and_speed_relaxed (attributes, result)
 end
 
 
---[[
 function factor_and_speed_networks (attributes, result)
 
 	factor_and_speed_balanced (attributes, result)
@@ -419,7 +417,7 @@ function factor_and_speed_networks (attributes, result)
 	end
 
 end
---]]
+
 --[[
 	Function to calculate the factor of an edge in the graph when routing.
 	If the edge is part of the brussels mobility network, favor it by a factor of 3.
