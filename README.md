@@ -136,3 +136,9 @@ Launch a `GET` request to `hostname/route`
 - `instructions`: Boolean to specify if you want the API to return route instructions or not (instructions are currently in highly Alpha stage)
 - `lang`: specify the language of the instructions (supported: `en`, `fr` and `nl`)
 
+
+## Docker
+
+
+docker run -it --name rideaway-backend -v /home/pietervdvn/git/cycling-backend/src/mapdata:/var/app/data -p 5000:5000 42c05b2557e1
+
