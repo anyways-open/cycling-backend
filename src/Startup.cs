@@ -1,19 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using rideaway_backend.Instance;
+using Serilog;
+using Serilog.Formatting.Json;
 
 namespace rideaway_backend {
     public class Startup {
@@ -22,6 +18,7 @@ namespace rideaway_backend {
         /// </summary>
         /// <param name="env">Environment of the appplication.</param>
         public Startup (IHostingEnvironment env) {
+            ConfigureLogging();
             var builder = new ConfigurationBuilder ()
                 .SetBasePath (env.ContentRootPath)
                 .AddJsonFile ("appsettings.json", optional : false, reloadOnChange : true)
@@ -47,7 +44,7 @@ namespace rideaway_backend {
             services.AddDirectoryBrowser ();
             services.AddSingleton<IConfiguration> (Configuration);
 
-            RouterInstance.initialize (Configuration);
+            RouterInstance.Initialize (Configuration);
             Languages.initialize (Configuration);
             ParkingInstance.initialize (Configuration);
             RequestLogger.initialize(Configuration);
@@ -88,6 +85,19 @@ namespace rideaway_backend {
                             paths.GetValue<string> ("LoggingEndpoint"))),
                     RequestPath = new PathString ("/" + paths.GetValue<string> ("LoggingEndpoint"))
             });
+        }
+
+        private static void ConfigureLogging()
+        {
+            var date = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            var logFile = Path.Combine("logs", $"log-{date}.txt");
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Information)
+                .Enrich.FromLogContext()
+                .WriteTo.File(new JsonFormatter(), logFile)
+                .WriteTo.Console()
+                .CreateLogger();
         }
     }
 }

@@ -6,3 +6,4 @@ src/cycling-backend.tar
 src/mapdata/belgium.routerdb
 src/obj/**
 src/bin/**
+src/logs/**

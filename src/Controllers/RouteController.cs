@@ -8,13 +8,16 @@ using rideaway_backend.Instance;
 using rideaway_backend.Model;
 using rideaway_backend.Util;
 using Microsoft.Extensions.Configuration;
+using Serilog;
 
-namespace rideaway_backend.Controllers {
+namespace rideaway_backend.Controllers
+{
     /// <summary>
     /// Controller for the routing endpoint.
     /// </summary>
-    [Route ("[controller]")]
-    public class RouteController : Controller {
+    [Route("[controller]")]
+    public class RouteController : Controller
+    {
         /// <summary>
         /// Main endpoint for the application, is invoked by a GET-request to <c>hostname/route</c>.
         /// </summary>
@@ -25,28 +28,33 @@ namespace rideaway_backend.Controllers {
         /// <param name="lang">Language of the instructions.</param>
         /// <returns>JSON result with geoJSON featurecollection representing the route.</returns>
         [HttpGet]
-        [EnableCors ("AllowAnyOrigin")]
-        public ActionResult Get (string loc1, string loc2, string profile = "", bool genInstructions = true, string lang = "en") {
-            try {
-                Coordinate from = Utility.ParseCoordinate (loc1);
-                Coordinate to = Utility.ParseCoordinate (loc2);
-                Route route = RouterInstance.Calculate (profile, from, to);
+        [EnableCors("AllowAnyOrigin")]
+        public ActionResult Get(string loc1, string loc2, string profile = "", bool genInstructions = true,
+            string lang = "en")
+        {
+            try
+            {
+                var from = Utility.ParseCoordinate(loc1);
+                var to = Utility.ParseCoordinate(loc2);
+                var route = RouterInstance.Calculate(profile, from, to);
                 GeoJsonFeatureCollection instructions = null;
-                if(genInstructions){
-                    try {
-                        instructions = RouterInstance.GenerateInstructions(route, lang);
-                    } catch {}
+                if (genInstructions)
+                {
+                    instructions = RouterInstance.GenerateInstructions(route, lang);
                 }
-
-                RequestLogger.LogRequest (from, to);
-                return Json (new RouteResponse (route, instructions));
-
-            } catch (ResolveException re) {
-                return NotFound (re.Message);
-            } catch (Exception e) {
-                return BadRequest (e.Message);
+                RequestLogger.LogRequest(from, to);
+                return Json(new RouteResponse(route, instructions));
+            }
+            catch (ResolveException e)
+            {
+                Log.Error(e, "Getting a route failed (not found)");
+                return NotFound(e.Message);
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, "Getting a route failed (other error)");
+                return BadRequest(e.Message);
             }
         }
-
     }
 }
