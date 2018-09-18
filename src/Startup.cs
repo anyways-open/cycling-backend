@@ -90,7 +90,7 @@ namespace rideaway_backend {
         private static void ConfigureLogging()
         {
             var date = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-            var logFile = Path.Combine("logs", $"log-{date}.txt");
+            var logFile = Path.Combine("logs", $"log-itinero-{date}.txt");
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Information)
