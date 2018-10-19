@@ -267,7 +267,7 @@ bicycle_balanced_factors = {
 }
 
 bicycle_balanced_factors_cycleway = {
-    ["lane"] = prefer_factor,
+    ["lane"] = avoid_factor,
     ["track"] = prefer_factor,
     ["shared_lane"] = prefer_factor,
     ["opposite_lane"] = prefer_factor,
