@@ -7,7 +7,7 @@ wget http://files.itinero.tech/data/OSM/planet/europe/belgium-latest.osm.pbf
 
 echo "Downloading the latest profiles"
 rm bicycle.lua
-wget https://raw.githubusercontent.com/anyways-open/cycling-backend/master/src/profiles/bicycle.lua
+wget -O bicycle.lua https://raw.githubusercontent.com/anyways-open/routing-profiles/master/bicycle.lua?token=ABZgbuydBw_2nzVgLCaFU39i40OlEa8-ks5cBo4twA%3D%3D
 
 echo "Running IDP"
 IDP="/var/data/mapdata/idp/src/IDP/bin/release/netcoreapp2.1/linux-x64/IDP"
