@@ -12,6 +12,7 @@ using Serilog;
 
 namespace rideaway_backend.Controllers
 {
+    /// <inheritdoc />
     /// <summary>
     /// Controller for the routing endpoint.
     /// </summary>

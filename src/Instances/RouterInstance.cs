@@ -58,6 +58,7 @@ namespace rideaway_backend.Instance
         /// </exception>
         public static Route Calculate(string profileName, Coordinate from, Coordinate to)
         {
+            Log.Information($"Handling request on profile {profileName} from {from} to {to}");
             if (string.IsNullOrWhiteSpace(profileName))
             {
                 profileName = "bicycle";

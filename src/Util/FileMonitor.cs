@@ -48,7 +48,6 @@ namespace rideaway_backend.FileMonitoring
         /// <summary>
         /// Creates a new file monitor for the given file.
         /// </summary>
-        /// <param name="path"></param>
         public FileMonitor(string path, TimeSpan renewEvery, Action onChange)
         {
             _fileInfo = new FileInfo(path);
@@ -102,7 +101,7 @@ namespace rideaway_backend.FileMonitoring
                     catch (Exception e)
                     {
                         Log.Error(
-                            $"Caught an exception in the callback of a filemonitor: {e.Message}. We're gonna retry next tick");
+                            $"Caught an exception in the callback of a file monitor: {e.Message}. We're gonna retry next tick");
                         Log.Error(e.StackTrace);
                     }
                 }
@@ -118,7 +117,7 @@ namespace rideaway_backend.FileMonitoring
         {
             try
             {
-                using (var stream = file.Open(FileMode.Open, FileAccess.Write))
+                using (var _ = file.Open(FileMode.Open, FileAccess.Write))
                 {
                     return true;
                 }

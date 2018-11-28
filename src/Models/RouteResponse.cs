@@ -4,6 +4,7 @@ using Itinero.Navigation.Instructions;
 using Newtonsoft.Json.Linq;
 using rideaway_backend.Extensions;
 using rideaway_backend.Instance;
+// ReSharper disable NotAccessedField.Local
 
 namespace rideaway_backend.Model {
     /// <summary>

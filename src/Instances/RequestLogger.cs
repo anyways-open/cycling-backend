@@ -18,13 +18,20 @@ namespace rideaway_backend.Instance {
         /// <param name="from">starting coordinate</param>
         /// <param name="to">ending coordinate</param>
         public static void LogRequest(Coordinate from, Coordinate to){
-            string row = DateTime.Now.ToString("yyyy-MM-ddTHH\\:mm\\:sszzz") + "," 
+            var row = DateTime.Now.ToString("yyyy-MM-ddTHH\\:mm\\:sszzz") + "," 
             + from.Latitude.ToString(new CultureInfo ("en-US")) + "," 
             + from.Longitude.ToString(new CultureInfo ("en-US")) + "," 
             + to.Latitude.ToString(new CultureInfo ("en-US")) + "," 
             + to.Longitude.ToString(new CultureInfo ("en-US")) + "\n";
 
-            File.AppendAllText(path + "/" + DateTime.Now.ToString("MMMM-yyyy") + ".csv", row);
+            
+            var filePath = path+ "/" + DateTime.Now.ToString("MMMM-yyyy") + ".csv";
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+
+            File.AppendAllText(filePath, row);
         }
 
         public static void initialize(IConfiguration configuration){
