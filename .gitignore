@@ -8,4 +8,4 @@ src/obj/**
 src/bin/**
 src/logs/**
 test/Rideaway.Tests/obj/**
-
+src/wwwroot/requests/**

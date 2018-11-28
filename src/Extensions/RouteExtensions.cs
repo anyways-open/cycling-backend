@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Itinero;
 using Itinero.Navigation.Instructions;
 
@@ -10,12 +11,12 @@ namespace rideaway_backend.Extensions {
         /// </summary>
         /// <param name="Route">The route object</param>
         /// <param name="instructions">The list of instructions to get the colours from</param>
-        public static void correctColours (this Route Route, IList<Instruction> instructions) {
-            int instructionIndex = 0;
-            Instruction currentInstruction = instructions[instructionIndex];
+        public static void CorrectColours (this Route Route, IList<Instruction> instructions) {
+            var instructionIndex = 0;
+            var currentInstruction = instructions[instructionIndex];
 
             for (var i = 0; i < Route.ShapeMeta.Length; i++) {
-                int currentShape = Route.ShapeMeta[i].Shape;
+                var currentShape = Route.ShapeMeta[i].Shape;
                 if (currentShape == currentInstruction.Shape) {
 
                     instructionIndex++;
@@ -29,6 +30,6 @@ namespace rideaway_backend.Extensions {
 
             }
         }
-
+        
     }
 }

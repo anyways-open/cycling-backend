@@ -126,7 +126,7 @@ namespace rideaway_backend.Extensions
                 instr += instruction + "\n";
             }
             
-            Log.Information($"Simplifying {instr}");
+            Log.Verbose($"Simplifying {instr}");
 
             if (instructions.Count < 5)
             {

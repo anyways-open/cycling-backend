@@ -1,18 +1,21 @@
 using System.Collections.Generic;
+using System.Linq;
 using Itinero;
 using Itinero.Navigation.Instructions;
 using Newtonsoft.Json.Linq;
 using rideaway_backend.Extensions;
 using rideaway_backend.Instance;
+using Serilog;
+
 // ReSharper disable NotAccessedField.Local
 
-namespace rideaway_backend.Model {
+namespace rideaway_backend.Model
+{
     /// <summary>
     /// Model of the response of the api.
     /// </summary>
-    public class RouteResponse {
-        private Route RouteObj;
-
+    public class RouteResponse
+    {
         public JObject Route { get; set; }
 
         public GeoJsonFeatureCollection Instructions { get; set; }
@@ -22,12 +25,16 @@ namespace rideaway_backend.Model {
         /// </summary>
         /// <param name="RouteObj">The route object.</param>
         /// <param name="Instructions">The instructions that go with this route.</param>
-        public RouteResponse (Route RouteObj, GeoJsonFeatureCollection Instructions) {
-            this.RouteObj = RouteObj;
+        public RouteResponse(Route RouteObj, GeoJsonFeatureCollection Instructions)
+        {
             this.Instructions = Instructions;
 
-            Route = JObject.Parse (RouteObj.ToGeoJson ());
+            // We throw away _all_ shapeMeta
+            RouteObj.ShapeMeta = new[] {RouteObj.ShapeMeta.Last()};
+            var attrs = RouteObj.ShapeMeta[0].Attributes;
+            attrs.RemoveKey("name");
+            attrs.RemoveKey("highway");
+            Route = JObject.Parse(RouteObj.ToGeoJson());
         }
-
     }
 }

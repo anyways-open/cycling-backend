@@ -128,7 +128,7 @@ namespace rideaway_backend.Instance
             var rawInstructions = routeObj.GenerateInstructions(_routerDb, Languages.GetLanguage(language));
             rawInstructions = rawInstructions.makeContinuous(routeObj);
             rawInstructions = rawInstructions.simplify(routeObj);
-            routeObj.correctColours(rawInstructions);
+            routeObj.CorrectColours(rawInstructions);
             return rawInstructions.ToGeoJsonCollection(routeObj);
         }
     }
