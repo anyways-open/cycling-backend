@@ -23,38 +23,40 @@
 using System;
 using System.IO;
 using System.Threading;
+using Serilog;
 
 namespace rideaway_backend.FileMonitoring
 {
     /// <summary>
     /// Represents a file monitor that continually monitors a file for changes.
     /// </summary>
-    internal class FileMonitor
+    public class FileMonitor
     {
-        private const int MonitorInterval = 9 * 1000;
         private readonly FileInfo _fileInfo; // Holds the fileinfo of the file to monitor.
         private readonly Timer _timer; // Holds the timer to poll file changes.
+
+
+        /// <summary>
+        /// An action to report that the file has changed and is accessible.
+        /// </summary>
+        private readonly Action _onFileChanged;
+
+        private DateTime _lastChangeTime;
+        private readonly object _sync = new object(); // Holds an object that is used to sync the timer.
+
 
         /// <summary>
         /// Creates a new file monitor for the given file.
         /// </summary>
         /// <param name="path"></param>
-        public FileMonitor(string path)
+        public FileMonitor(string path, TimeSpan renewEvery, Action onChange)
         {
             _fileInfo = new FileInfo(path);
-            _timestamp = _fileInfo.LastWriteTime.Ticks;
+            _lastChangeTime = _fileInfo.LastWriteTime;
 
-            _timer = new Timer(Tick, null, Timeout.Infinite, Timeout.Infinite);
-        }
-
-        /// <summary>
-        /// Starts monitoring.
-        /// </summary>
-        public void Start()
-        {
-            _fileInfo.Refresh();
-            _timestamp = _fileInfo.LastWriteTime.Ticks;
-            _timer.Change(MonitorInterval, MonitorInterval);
+            _timer = new Timer(Tick, null, renewEvery, renewEvery);
+            _onFileChanged = onChange;
+            Log.Information($"Started monitoring {path}");
         }
 
         /// <summary>
@@ -65,70 +67,61 @@ namespace rideaway_backend.FileMonitoring
             _timer.Change(Timeout.Infinite, Timeout.Infinite);
         }
 
+
         /// <summary>
-        /// Returns true if the file is available for reading and not in a state that is changing.
+        /// Called every _timeout_ milliseconds.
+        /// Here we check if something has changed.
+        /// If a change occured, we call the callback.
+        /// We do _not_ call the callback if the file was deleted; we assume that this is part of the update process
         /// </summary>
-        /// <returns></returns>
-        public bool IsAvailable()
+        private void Tick(object _)
         {
             lock (_sync)
             {
                 _fileInfo.Refresh();
-                if (!_fileInfo.Exists)
+
+                if (!_fileInfo.Exists) return;
+                if (!IsAvailable(_fileInfo))
                 {
-                    return false;
+                    Log.Verbose(
+                        $"File {_fileInfo.Name} is currently locked, so it might be changed. We'll recheck on the next tick");
+                    return; // Nevermind, we'll come back later
                 }
-                return !IsFileLocked(_fileInfo);
-            }
-        }
 
-        /// <summary>
-        /// An action to report that the file has changed and is accessible.
-        /// </summary>
-        public Action<FileMonitor> FileChanged
-        {
-            get;
-            set;
-        }
+                var lastChange = _fileInfo.LastWriteTime;
 
-        private long _timestamp; // Holds the last modified timestamp.
-        private readonly object _sync = new object(); // Holds an object that is used to sync the timer.
-
-        /// <summary>
-        /// Called when the timer ticks.
-        /// </summary>
-        /// <param name="state"></param>
-        private void Tick(object state)
-        {
-            lock (_sync)
-            {
-                if (FileChanged != null)
+                // ReSharper disable once InvertIf
+                if (!Equals(lastChange, _lastChangeTime))
                 {
-                    _fileInfo.Refresh();
-                    if (_fileInfo.Exists)
+                    Log.Information($"File {_fileInfo.Name} has changed; calling callback.");
+                    try
                     {
-                        if (_timestamp != _fileInfo.LastWriteTime.Ticks)
-                        { // file has been written to.
-                            _timestamp = _fileInfo.LastWriteTime.Ticks;
-                            FileChanged(this);
-                        }
+                        _onFileChanged();
+                        _lastChangeTime = lastChange;
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error(
+                            $"Caught an exception in the callback of a filemonitor: {e.Message}. We're gonna retry next tick");
+                        Log.Error(e.StackTrace);
                     }
                 }
             }
         }
 
         /// <summary>
-        /// Not so nice code to check if a file is locked.
+        /// Checks if a file is locked, e.g. because another process is writing to it
         /// </summary>
         /// <param name="file"></param>
         /// <returns></returns>
-        private static bool IsFileLocked(FileInfo file)
+        private static bool IsAvailable(FileInfo file)
         {
-            FileStream stream = null;
-
             try
             {
-                stream = file.Open(FileMode.Open, FileAccess.Read);
+                using (var stream = file.Open(FileMode.Open, FileAccess.Write))
+                {
+                    return true;
+                }
             }
             catch
             {
@@ -136,15 +129,8 @@ namespace rideaway_backend.FileMonitoring
                 //still being written to
                 //or being processed by another thread
                 //or does not exist (has already been processed)
-                return true;
+                return false;
             }
-            finally
-            {
-                stream?.Dispose();
-            }
-
-            //file is not locked
-            return false;
         }
     }
 }

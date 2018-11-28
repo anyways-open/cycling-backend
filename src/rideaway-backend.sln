@@ -3,6 +3,10 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2017
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "rideaway-backend", "rideaway-backend.csproj", "{C9895C1F-9C60-4FC8-AA5E-499523A3E182}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{8402F619-E165-409B-9616-8ED45E999CAC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rideaway.Tests", "..\test\Rideaway.Tests\Rideaway.Tests.csproj", "{153EB3E4-D286-49B0-B05D-E145DEAD108C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -13,5 +17,12 @@ Global
 		{C9895C1F-9C60-4FC8-AA5E-499523A3E182}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C9895C1F-9C60-4FC8-AA5E-499523A3E182}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C9895C1F-9C60-4FC8-AA5E-499523A3E182}.Release|Any CPU.Build.0 = Release|Any CPU
+		{153EB3E4-D286-49B0-B05D-E145DEAD108C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{153EB3E4-D286-49B0-B05D-E145DEAD108C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{153EB3E4-D286-49B0-B05D-E145DEAD108C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{153EB3E4-D286-49B0-B05D-E145DEAD108C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{153EB3E4-D286-49B0-B05D-E145DEAD108C} = {8402F619-E165-409B-9616-8ED45E999CAC}
 	EndGlobalSection
 EndGlobal

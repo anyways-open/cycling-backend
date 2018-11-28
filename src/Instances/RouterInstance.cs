@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using Itinero;
 using Itinero.LocalGeo;
@@ -6,6 +7,7 @@ using rideaway_backend.Exceptions;
 using rideaway_backend.FileMonitoring;
 using Microsoft.Extensions.Configuration;
 using rideaway_backend.Model;
+using Serilog;
 
 namespace rideaway_backend.Instance
 {
@@ -16,7 +18,7 @@ namespace rideaway_backend.Instance
     {
         private static Router _router;
         private static RouterDb _routerDb;
-        private static FilesMonitor<FileInfo> _monitor;
+        private static FileMonitor _monitor;
 
         /// <summary>
         /// Loads the routerdb into ram and starts the file monitor that automatically checks
@@ -24,25 +26,24 @@ namespace rideaway_backend.Instance
         /// </summary>
         public static void Initialize(IConfiguration configuration)
         {
-            var paths = configuration.GetSection("Paths");
-            using (var stream = new FileInfo(paths.GetValue<string>("RouterdbFile")).OpenRead())
+            var path = configuration.GetSection("Paths").GetValue<string>("RouterdbFile");
+            using (var stream = new FileInfo(path).OpenRead())
             {
                 _routerDb = RouterDb.Deserialize(stream);
             }
 
             _router = new Router(_routerDb);
-            _monitor = new FilesMonitor<FileInfo>((f) =>
-            {
-                using (var stream = new FileInfo(paths.GetValue<string>("RouterdbFile")).OpenRead())
+            _monitor = new FileMonitor(path, TimeSpan.FromMinutes(1),
+                () =>
                 {
-                    _routerDb = RouterDb.Deserialize(stream);
-                }
+                    using (var stream = new FileInfo(path).OpenRead())
+                    {
+                        _routerDb = RouterDb.Deserialize(stream);
 
-                _router = new Router(_routerDb);
-                return true;
-            }, new FileInfo(paths.GetValue<string>("RouterdbFile")));
-            _monitor.Start();
-            _monitor.AddFile(paths.GetValue<string>("RouterdbFile"));
+                        _router = new Router(_routerDb);
+                        Log.Information("RouterDB has been updated to the latest version");
+                    }
+                });
         }
 
         /// <summary>

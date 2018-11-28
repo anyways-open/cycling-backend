@@ -3,7 +3,9 @@ src/.idea/**
 **/bin/**
 cycling-backend.sln.DotSettings.user
 src/cycling-backend.tar
-src/mapdata/belgium.routerdb
+src/mapdata/**
 src/obj/**
 src/bin/**
 src/logs/**
+test/Rideaway.Tests/obj/**
+

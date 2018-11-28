@@ -98,6 +98,7 @@ namespace rideaway_backend {
                 .WriteTo.File(new JsonFormatter(), logFile)
                 .WriteTo.Console()
                 .CreateLogger();
+            Log.Information($"Logging has started. Logfile can be found at {logFile}");
         }
     }
 }
