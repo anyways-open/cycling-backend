@@ -3,31 +3,38 @@ using System.Linq;
 using Itinero;
 using Itinero.Navigation.Instructions;
 
-namespace rideaway_backend.Extensions {
-    public static class RouteExtensions {
+namespace rideaway_backend.Extensions
+{
+    public static class RouteExtensions
+    {
         /// <summary>
         /// Correct the colours of the cyclenetwork on the route so there is only one colour
         /// present that matches the colours in the instructions
         /// </summary>
         /// <param name="Route">The route object</param>
         /// <param name="instructions">The list of instructions to get the colours from</param>
-        public static void CorrectColours (this Route Route, IList<Instruction> instructions) {
+        public static void CorrectColours(this Route Route, IList<Instruction> instructions)
+        {
             var instructionIndex = 0;
             var currentInstruction = instructions[instructionIndex];
 
-            for (var i = 0; i < Route.ShapeMeta.Length; i++) {
+            for (var i = 0; i < Route.ShapeMeta.Length; i++)
+            {
                 var currentShape = Route.ShapeMeta[i].Shape;
-                if (currentShape == currentInstruction.Shape) {
-
+                if (currentShape == currentInstruction.Shape)
+                {
                     instructionIndex++;
-                    if (instructionIndex < instructions.Count - 1) {
+                    if (instructionIndex < instructions.Count - 1)
+                    {
                         currentInstruction = instructions[instructionIndex];
                     }
                 }
-                if (i < Route.ShapeMeta.Length - 1) {
-                    Route.ShapeMeta[i + 1].Attributes.AddOrReplace ("colour", currentInstruction.GetAttribute ("cyclecolour", Route));
-                }
 
+                if (i < Route.ShapeMeta.Length - 1)
+                {
+                    Route.ShapeMeta[i + 1].Attributes
+                        .AddOrReplace("colour", currentInstruction.GetAttribute("cyclecolour", Route));
+                }
             }
         }
 
@@ -40,18 +47,17 @@ namespace rideaway_backend.Extensions {
         /// </summary>
         public static void MergePerColour(this Route route)
         {
-
             var newShapeMeta = new List<Route.Meta>();
 
 
             var meta = route.ShapeMeta;
+
             
             for (int i = 0; i < meta.Length - 1; i++)
             {
-
                 var attr = meta[i].Attributes;
                 attr.TryGetValue("colour", out var colour);
-                meta[i+1].Attributes.TryGetValue("colour", out var nextColour);
+                meta[i + 1].Attributes.TryGetValue("colour", out var nextColour);
 
                 if (!Equals(colour, nextColour))
                 {
@@ -61,16 +67,15 @@ namespace rideaway_backend.Extensions {
                     newShapeMeta.Add(meta[i]);
                 }
             }
-            // We always have to add the last element, as it represents the last section
-            newShapeMeta.Add(meta[meta.Length-1]);
+
+            var last = meta.Last().Attributes;
+            last.RemoveKey("name");
+            last.RemoveKey("highway");
+
+            newShapeMeta.Add(meta.Last());
 
 
             route.ShapeMeta = newShapeMeta.ToArray();
-
         }
-        
-        
-        
-        
     }
 }
