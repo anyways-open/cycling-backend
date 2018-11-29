@@ -18,7 +18,6 @@ namespace rideaway_backend.Instance
     {
         private static Router _router;
         private static RouterDb _routerDb;
-        private static FileMonitor _monitor;
 
         /// <summary>
         /// Loads the routerdb into ram and starts the file monitor that automatically checks
@@ -26,35 +25,28 @@ namespace rideaway_backend.Instance
         /// </summary>
         public static void Initialize(IConfiguration configuration)
         {
-            try
+            var path = configuration.GetSection("Paths").GetValue<string>("RouterdbFile");
+            Log.Information($"Loading routerDB file from {path}");
+            using (var stream = new FileInfo(path).OpenRead())
             {
-
-                var path = configuration.GetSection("Paths").GetValue<string>("RouterdbFile");
-                Log.Information($"Loading routerDB file from {path}");
-                using (var stream = new FileInfo(path).OpenRead())
-                {
-                    _routerDb = RouterDb.Deserialize(stream);
-                }
-
+                _routerDb = RouterDb.Deserialize(stream);
                 _router = new Router(_routerDb);
-                _monitor = new FileMonitor(path, TimeSpan.FromMinutes(1),
-                    () =>
-                    {
-                        using (var stream = new FileInfo(path).OpenRead())
-                        {
-                            _routerDb = RouterDb.Deserialize(stream);
+                Log.Information("RouterDB has been loaded");
+            }
 
-                            _router = new Router(_routerDb);
-                            Log.Information("RouterDB has been updated to the latest version");
-                        }
-                    });
-            }
-            catch(Exception e)
-            {
-                Log.Error($"Loading routerdb failed! {e.Message}. Queries might return empty");
-                throw;
-            }
+            new FileMonitor(path, TimeSpan.FromMinutes(1),
+                () =>
+                {
+                    using (var stream = new FileInfo(path).OpenRead())
+                    {
+                        _routerDb = RouterDb.Deserialize(stream);
+
+                        _router = new Router(_routerDb);
+                        Log.Information("RouterDB has been updated to the latest version");
+                    }
+                });
         }
+
 
         /// <summary>
         /// Calculate a route.
@@ -81,6 +73,7 @@ namespace rideaway_backend.Instance
             if (!_router.Db.SupportProfile(profileName))
             {
                 var profilesStr = "{";
+
                 var profiles = _router.Db.GetSupportedProfiles();
                 foreach (var p in profiles)
                 {
@@ -106,6 +99,7 @@ namespace rideaway_backend.Instance
             }
 
             dist = 50;
+
             var point2 = _router.TryResolve(profile, to, dist);
             while (point2.IsError && dist < 1600)
             {
