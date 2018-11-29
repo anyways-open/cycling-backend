@@ -22,7 +22,7 @@ COPY ./language /var/app/language
 
 
 # couple data folder data volume.
-VOLUME ["/var/app/data"]
+VOLUME ["/var/data/mapdata"] # Here is the routerdb saved in production
 VOLUME ["/var/app/logs"]
 
 # SET base url
