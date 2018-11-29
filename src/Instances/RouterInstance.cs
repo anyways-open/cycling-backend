@@ -129,11 +129,21 @@ namespace rideaway_backend.Instance
         /// <returns>A GeoJsonFeatureCollection object representing the instructions.</returns>
         public static GeoJsonFeatureCollection GenerateInstructions(Route routeObj, string language = "en")
         {
-            var rawInstructions = routeObj.GenerateInstructions(_routerDb, Languages.GetLanguage(language));
-            rawInstructions = rawInstructions.makeContinuous(routeObj);
-            rawInstructions = rawInstructions.simplify(routeObj);
-            routeObj.CorrectColours(rawInstructions);
-            return rawInstructions.ToGeoJsonCollection(routeObj);
+            try
+            {
+
+                var rawInstructions = routeObj.GenerateInstructions(_routerDb, Languages.GetLanguage(language));
+                rawInstructions = rawInstructions.makeContinuous(routeObj);
+                rawInstructions = rawInstructions.simplify(routeObj);
+                routeObj.CorrectColours(rawInstructions);
+                return rawInstructions.ToGeoJsonCollection(routeObj);
+            }
+            catch (Exception e)
+            {
+                Log.Error($"Could not generate instructions! {e.Message}");
+                Log.Error(e.StackTrace);
+                return null;
+            }
         }
     }
 }
