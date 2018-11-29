@@ -10,7 +10,7 @@ wget -O bicycle.lua https://raw.githubusercontent.com/anyways-open/routing-profi
 
 echo "Running IDP"
 IDP="./idp/src/IDP/bin/release/netcoreapp2.1/linux-x64/IDP"
-$IDP --read-pbf /var/data/mapdata/belgium-latest.osm.pbf --pr --create-routerdb vehicles=/var/data/mapdata/bicycle.lua --elevation --contract "bicycle" --contract "bicycle.shortest" --contract "bicycle.balanced" --contract "bicycle.networks" --contract "bicycle.brussels" --contract "bicycle.relaxed" --write-routerdb staged.belgium.routerdb
+$IDP --read-pbf belgium-latest.osm.pbf --pr --create-routerdb vehicles=bicycle.lua --elevation --contract "bicycle" --contract "bicycle.shortest" --contract "bicycle.balanced" --contract "bicycle.networks" --contract "bicycle.brussels" --contract "bicycle.relaxed" --write-routerdb staged.belgium.routerdb
 
 # The routerdb is first written to staged.belgium.routerdb
 # This is to prevent that the code sees a half-finished DB
