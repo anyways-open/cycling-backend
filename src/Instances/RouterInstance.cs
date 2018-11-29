@@ -87,9 +87,9 @@ namespace rideaway_backend.Instance
             var profile = _router.Db.GetSupportedProfile(profileName);
             var dist = 50;
             var point1 = _router.TryResolve(profile, from, dist);
-            while (point1.IsError && dist < 1600)
+            while (point1.IsError && dist <= 500000)
             {
-                dist *= 2;
+                dist *= 10;
                 point1 = _router.TryResolve(profile, from, dist);
             }
 
@@ -101,9 +101,9 @@ namespace rideaway_backend.Instance
             dist = 50;
 
             var point2 = _router.TryResolve(profile, to, dist);
-            while (point2.IsError && dist < 1600)
+            while (point2.IsError && dist < 500000)
             {
-                dist *= 2;
+                dist *= 10;
                 point2 = _router.TryResolve(profile, from, dist);
             }
 
