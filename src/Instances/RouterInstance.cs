@@ -26,24 +26,34 @@ namespace rideaway_backend.Instance
         /// </summary>
         public static void Initialize(IConfiguration configuration)
         {
-            var path = configuration.GetSection("Paths").GetValue<string>("RouterdbFile");
-            using (var stream = new FileInfo(path).OpenRead())
+            try
             {
-                _routerDb = RouterDb.Deserialize(stream);
-            }
 
-            _router = new Router(_routerDb);
-            _monitor = new FileMonitor(path, TimeSpan.FromMinutes(1),
-                () =>
+                var path = configuration.GetSection("Paths").GetValue<string>("RouterdbFile");
+                Log.Information($"Loading routerDB file from {path}");
+                using (var stream = new FileInfo(path).OpenRead())
                 {
-                    using (var stream = new FileInfo(path).OpenRead())
-                    {
-                        _routerDb = RouterDb.Deserialize(stream);
+                    _routerDb = RouterDb.Deserialize(stream);
+                }
 
-                        _router = new Router(_routerDb);
-                        Log.Information("RouterDB has been updated to the latest version");
-                    }
-                });
+                _router = new Router(_routerDb);
+                _monitor = new FileMonitor(path, TimeSpan.FromMinutes(1),
+                    () =>
+                    {
+                        using (var stream = new FileInfo(path).OpenRead())
+                        {
+                            _routerDb = RouterDb.Deserialize(stream);
+
+                            _router = new Router(_routerDb);
+                            Log.Information("RouterDB has been updated to the latest version");
+                        }
+                    });
+            }
+            catch(Exception e)
+            {
+                Log.Error($"Loading routerdb failed! {e.Message}. Queries might return empty");
+                throw;
+            }
         }
 
         /// <summary>

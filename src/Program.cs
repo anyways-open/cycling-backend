@@ -17,7 +17,7 @@ namespace rideaway_backend
                 Directory.CreateDirectory("wwwroot/requests/data");
             }
             
-            if (!Directory.Exists("wwwroot/requests/data"))
+            if (!Directory.Exists("wwwroot/routes"))
             {
                 Directory.CreateDirectory("wwwroot/routes");
             }
