@@ -30,6 +30,47 @@ namespace rideaway_backend.Extensions {
 
             }
         }
+
+
+        /// <summary>
+        /// Creates a new ShapeMeta list within the route.
+        /// This shapeMeta merges all the shapeMeta's with the same colour.
+        ///
+        /// Modifies the route
+        /// </summary>
+        public static void MergePerColour(this Route route)
+        {
+
+            var newShapeMeta = new List<Route.Meta>();
+
+
+            var meta = route.ShapeMeta;
+            
+            for (int i = 0; i < meta.Length - 1; i++)
+            {
+
+                var attr = meta[i].Attributes;
+                attr.TryGetValue("colour", out var colour);
+                meta[i+1].Attributes.TryGetValue("colour", out var nextColour);
+
+                if (!Equals(colour, nextColour))
+                {
+                    attr.RemoveKey("name");
+                    attr.RemoveKey("highway");
+
+                    newShapeMeta.Add(meta[i]);
+                }
+            }
+            // We always have to add the last element, as it represents the last section
+            newShapeMeta.Add(meta[meta.Length-1]);
+
+
+            route.ShapeMeta = newShapeMeta.ToArray();
+
+        }
+        
+        
+        
         
     }
 }

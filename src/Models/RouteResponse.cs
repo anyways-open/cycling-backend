@@ -29,11 +29,7 @@ namespace rideaway_backend.Model
         {
             this.Instructions = Instructions;
 
-            // We throw away _all_ shapeMeta
-            RouteObj.ShapeMeta = new[] {RouteObj.ShapeMeta.Last()};
-            var attrs = RouteObj.ShapeMeta[0].Attributes;
-            attrs.RemoveKey("name");
-            attrs.RemoveKey("highway");
+            RouteObj.MergePerColour();
             Route = JObject.Parse(RouteObj.ToGeoJson());
         }
     }
