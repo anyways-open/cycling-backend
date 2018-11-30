@@ -4,7 +4,7 @@
 # docker load -i cycling-backend.tar
 
 STATE=`docker pull anywaysopen/cycling-backend`
-echo $STATE | grep "newer update"
+echo $STATE | grep "newer image"
 if [[ $? ]]
 then
 
