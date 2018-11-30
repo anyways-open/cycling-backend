@@ -5,9 +5,9 @@
 
 STATE=`docker pull anywaysopen/cycling-backend`
 echo $STATE | grep "newer image"
-if [[ $? ]]
+if [[ $STATE =~ "newer image" ]]
 then
-
+	date
 	echo "Got a newer update. Deploying now..."
 	./run-docker.sh
 else
