@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Itinero;
 using Itinero.LocalGeo;
+using Itinero.Profiles;
 using rideaway_backend.Extensions;
 using rideaway_backend.Exceptions;
 using rideaway_backend.FileMonitoring;
@@ -19,13 +20,18 @@ namespace rideaway_backend.Instance
         private static Router _router;
         private static RouterDb _routerDb;
 
+        public static void Initialize(IConfiguration configuration)
+        {
+            var path = configuration.GetSection("Paths").GetValue<string>("RouterdbFile");
+            Initialize(path);
+        }
+
         /// <summary>
         /// Loads the routerdb into ram and starts the file monitor that automatically checks
         /// for updates in the routerdb and reloads when necessary.
         /// </summary>
-        public static void Initialize(IConfiguration configuration)
+        public static void Initialize(string path)
         {
-            var path = configuration.GetSection("Paths").GetValue<string>("RouterdbFile");
             Log.Information($"Loading routerDB file from {path}");
             using (var stream = new FileInfo(path).OpenRead())
             {
@@ -47,6 +53,35 @@ namespace rideaway_backend.Instance
                 });
         }
 
+
+        public static RouterPoint ResolvePointProgressive(Profile profile, Coordinate point)
+        {
+            var dist = 50;
+            var maxDist = 500000;
+            Result<RouterPoint> point1 = null;
+
+            while (point1 == null || point1.IsError)
+            {
+                if (dist > maxDist)
+                {
+                    throw new ResolveException($"Location {point} could not be resolved");
+                }
+
+                point1 = _router.TryResolve(profile, point, dist);
+                dist *= 10;
+            }
+
+            return point1.Value;
+        }
+
+
+        /// <summary>
+        /// ONly used for testing
+        /// </summary>
+        public static Router GetRouter()
+        {
+            return _router;
+        }
 
         /// <summary>
         /// Calculate a route.
@@ -85,23 +120,11 @@ namespace rideaway_backend.Instance
             }
 
             var profile = _router.Db.GetSupportedProfile(profileName);
-            var dist = 50000;
-            var point1 = _router.TryResolve(profile, from, dist);
 
-            if (point1.IsError)
-            {
-                throw new ResolveException("Location 1 could not be resolved");
-            }
+            var point1 = ResolvePointProgressive(profile, from);
+            var point2 = ResolvePointProgressive(profile, to);
 
-
-            var point2 = _router.TryResolve(profile, to, dist);
-
-            if (point2.IsError)
-            {
-                throw new ResolveException("Location 2 could not be resolved");
-            }
-
-            var result = _router.TryCalculate(profile, point1.Value, point2.Value);
+            var result = _router.TryCalculate(profile, point1, point2);
             if (result.IsError)
             {
                 throw new ResolveException("No path found between locations");
@@ -120,7 +143,6 @@ namespace rideaway_backend.Instance
         {
             try
             {
-
                 var rawInstructions = routeObj.GenerateInstructions(_routerDb, Languages.GetLanguage(language));
                 rawInstructions = rawInstructions.makeContinuous(routeObj);
                 rawInstructions = rawInstructions.simplify(routeObj);
