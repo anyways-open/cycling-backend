@@ -1,7 +1,11 @@
+#! /bin/bash
+
+# This script pulls from docker and deploys on changes
+
+
 # loads and executes the docker image
 # to be run on the server
 
-# docker load -i cycling-backend.tar
 
 STATE=`docker pull anywaysopen/cycling-backend`
 echo $STATE | grep "newer image"
