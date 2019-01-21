@@ -9,3 +9,9 @@ src/bin/**
 src/logs/**
 test/Rideaway.Tests/obj/**
 src/wwwroot/requests/**
+scripts/*.osm.pbf
+scripts/idp
+scripts/*.lua
+scripts/routing-profiles
+scripts/srtm-cache/*
+
