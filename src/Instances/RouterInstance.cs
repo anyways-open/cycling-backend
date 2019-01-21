@@ -3,10 +3,10 @@ using System.IO;
 using Itinero;
 using Itinero.LocalGeo;
 using Itinero.Profiles;
-using rideaway_backend.Extensions;
-using rideaway_backend.Exceptions;
-using rideaway_backend.FileMonitoring;
 using Microsoft.Extensions.Configuration;
+using rideaway_backend.Exceptions;
+using rideaway_backend.Extensions;
+using rideaway_backend.FileMonitoring;
 using rideaway_backend.Model;
 using Serilog;
 
@@ -23,14 +23,24 @@ namespace rideaway_backend.Instance
         public static void Initialize(IConfiguration configuration)
         {
             var path = configuration.GetSection("Paths").GetValue<string>("RouterdbFile");
-            Initialize(path);
+
+            var timeSec = configuration.GetValue<int>("RouterDBRefreshTimeout");
+            if (timeSec < 1)
+            {
+                timeSec = 1;
+            }
+            Log.Information($"The routerDB will be checked every {timeSec} seconds for updates and reloaded if necessary");
+            var timePeriod = TimeSpan.FromSeconds(timeSec);
+            Initialize(path, timePeriod);
         }
 
         /// <summary>
         /// Loads the routerdb into ram and starts the file monitor that automatically checks
         /// for updates in the routerdb and reloads when necessary.
         /// </summary>
-        public static void Initialize(string path)
+        /// <param name="path">The path where the routerdb lives</param>
+        /// <param name="recheckRouterDb">Every 'recheckRouterDB'-time, the routerdb will be inspected and, if changed, reloaded</param>
+        public static void Initialize(string path, TimeSpan recheckRouterDb)
         {
             Log.Information($"Loading routerDB file from {path}");
             using (var stream = new FileInfo(path).OpenRead())
@@ -40,7 +50,8 @@ namespace rideaway_backend.Instance
                 Log.Information("RouterDB has been loaded");
             }
 
-            new FileMonitor(path, TimeSpan.FromMinutes(1),
+            // ReSharper disable once ObjectCreationAsStatement
+            new FileMonitor(path, recheckRouterDb,
                 () =>
                 {
                     using (var stream = new FileInfo(path).OpenRead())

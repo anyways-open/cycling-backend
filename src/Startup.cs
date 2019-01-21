@@ -46,7 +46,6 @@ namespace rideaway_backend {
 
             RouterInstance.Initialize (Configuration);
             Languages.initialize (Configuration);
-            ParkingInstance.initialize (Configuration);
             RequestLogger.initialize(Configuration);
         }
 
