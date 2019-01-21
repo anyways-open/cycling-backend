@@ -9,6 +9,17 @@ cd cycling-backend
 git pull
 cd ..
 
+if [ ! -d idp ]
+then
+    git clone git@github.com:itinero/idp.git
+fi
+
+cd idp
+git pull
+./build.sh
+./publish.sh
+cd ..
+
 rm *.sh
 cp cycling-backend/scripts/* .
 chmod u+x *.sh
