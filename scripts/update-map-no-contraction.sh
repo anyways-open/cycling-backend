@@ -7,21 +7,21 @@ then
 fi
 
 
-echo "Downloading the latest profiles"
 if [ ! -d routing-profiles ]
 then
+    echo "Downloading the latest profiles"
     git clone git@github.com:anyways-open/routing-profiles.git
 fi
 
 
-cd routing-profiles
-git pull
-cd ..
 
-if [ -f routing-profiles/bicycle.lua ]
+if [ ! -f bicycle.lua ]
 then
-#    rm bicycle.lua
-#    cp routing-profiles/bicycle.lua .
+    cd routing-profiles
+    git pull
+    cd ..
+    cp routing-profiles/bicycle.lua .
+else
     echo "Using the old bicycle profile"
 fi
 
