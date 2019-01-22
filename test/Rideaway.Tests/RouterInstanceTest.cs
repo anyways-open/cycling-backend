@@ -74,7 +74,7 @@ namespace Rideaway.Tests
         public void TestProgressiveResolve()
         {
             FixRouterDb();
-            RouterInstance.Initialize(path);
+            RouterInstance.Initialize(path, TimeSpan.FromMinutes(1));
 
 
             var profile = RouterInstance.GetRouter().Db.GetSupportedProfile("bicycle");
