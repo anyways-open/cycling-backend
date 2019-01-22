@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using Itinero;
 using Itinero.Navigation.Instructions;
 
@@ -7,6 +6,69 @@ namespace rideaway_backend.Extensions
 {
     public static class RouteExtensions
     {
+        /// <summary>
+        /// Introspects the colours of the route.
+        /// If, on a segment, multiple colours can be chosen, then the most popular colour is chosen.
+        /// </summary>
+        /// <param name="route"></param>
+        public static void PruneColours(this Route route)
+        {
+            var ambiguityDetected = false;
+            var hist = new Dictionary<string, int>();
+            foreach (var meta in route.ShapeMeta)
+            {
+                if (!meta.Attributes.TryGetValue("cyclecolour", out var colour)) continue;
+
+                if (colour.Contains(","))
+                {
+                    ambiguityDetected = true;
+                    continue;
+                }
+
+                if (!hist.ContainsKey(colour))
+                {
+                    hist[colour] = 0;
+                }
+
+                hist[colour] = hist[colour] + 1;
+            }
+
+            if (!ambiguityDetected)
+            {
+                return;
+            }
+
+            /* FUNCTION */
+            int GetCount(string colour)
+            {
+                return hist.ContainsKey(colour) ? hist[colour] : 0;
+            }
+
+            // We have a histogram! Time to make choices
+            foreach (var meta in route.ShapeMeta)
+            {
+                if (!meta.Attributes.TryGetValue("cyclecolour", out var colour)) continue;
+                if (!colour.Contains(",")) continue;
+
+                var possibleColours = colour.Split(",");
+                var best = possibleColours[0];
+                var bestCount = GetCount(best);
+                for (int i = 1; i < possibleColours.Length; i++)
+                {
+                    var col = possibleColours[i];
+                    var count = GetCount(col);
+                    if (bestCount < count)
+                    {
+                        count = bestCount;
+                        best = col;
+                    }
+                }
+
+                meta.Attributes.AddOrReplace("cyclecolour", best);
+            }
+        }
+
+
         /// <summary>
         /// Correct the colours of the cyclenetwork on the route so there is only one colour
         /// present that matches the colours in the instructions
@@ -36,46 +98,6 @@ namespace rideaway_backend.Extensions
                         .AddOrReplace("colour", currentInstruction.GetAttribute("cyclecolour", Route));
                 }
             }
-        }
-
-
-        /// <summary>
-        /// Creates a new ShapeMeta list within the route.
-        /// This shapeMeta merges all the shapeMeta's with the same colour.
-        ///
-        /// Modifies the route
-        /// </summary>
-        public static void MergePerColour(this Route route)
-        {
-            var newShapeMeta = new List<Route.Meta>();
-
-
-            var meta = route.ShapeMeta;
-
-            
-            for (int i = 0; i < meta.Length - 1; i++)
-            {
-                var attr = meta[i].Attributes;
-                attr.TryGetValue("colour", out var colour);
-                meta[i + 1].Attributes.TryGetValue("colour", out var nextColour);
-
-                if (!Equals(colour, nextColour))
-                {
-                    attr.RemoveKey("name");
-                    attr.RemoveKey("highway");
-
-                    newShapeMeta.Add(meta[i]);
-                }
-            }
-
-            var last = meta.Last().Attributes;
-            last.RemoveKey("name");
-            last.RemoveKey("highway");
-
-            newShapeMeta.Add(meta.Last());
-
-
-            route.ShapeMeta = newShapeMeta.ToArray();
         }
     }
 }

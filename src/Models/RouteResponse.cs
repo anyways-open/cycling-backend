@@ -29,7 +29,6 @@ namespace rideaway_backend.Model
         {
             this.Instructions = Instructions;
 
-            RouteObj.MergePerColour();
             Route = JObject.Parse(RouteObj.ToGeoJson());
         }
     }

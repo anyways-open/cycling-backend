@@ -1,13 +1,11 @@
 using System;
-using Itinero;
-using Itinero.LocalGeo;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using rideaway_backend.Exceptions;
+using rideaway_backend.Extensions;
 using rideaway_backend.Instance;
 using rideaway_backend.Model;
 using rideaway_backend.Util;
-using Microsoft.Extensions.Configuration;
 using Serilog;
 
 namespace rideaway_backend.Controllers
@@ -19,6 +17,8 @@ namespace rideaway_backend.Controllers
     [Route("[controller]")]
     public class RouteController : Controller
     {
+        
+        
         /// <summary>
         /// Main endpoint for the application, is invoked by a GET-request to <c>hostname/route</c>.
         /// </summary>
@@ -38,6 +38,9 @@ namespace rideaway_backend.Controllers
                 var from = Utility.ParseCoordinate(loc1);
                 var to = Utility.ParseCoordinate(loc2);
                 var route = RouterInstance.Calculate(profile, from, to);
+                
+                route.PruneColours();
+                
                 GeoJsonFeatureCollection instr = null;
                 if (instructions)
                 {
