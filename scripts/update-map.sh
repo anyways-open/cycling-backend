@@ -19,7 +19,7 @@ fi
 
 echo "Downloading the latest map from itinero"
 rm belgium-latest.osm.pbf
-wget http://files.itinero.tech/data/OSM/planet/europe/belgium-latest.osm.pbf
+wget http://download.geofabrik.de/europe/belgium-latest.osm.pbf
 
 
 
