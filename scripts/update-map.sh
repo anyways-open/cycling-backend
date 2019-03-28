@@ -25,8 +25,8 @@ wget http://download.geofabrik.de/europe/belgium-latest.osm.pbf
 
 echo "Running IDP"
 IDP="./idp/src/IDP/bin/release/netcoreapp2.1/linux-x64/IDP"
-# $IDP --read-pbf belgium-latest.osm.pbf --pr --create-routerdb vehicles=bicycle.lua --islands --elevation --contract "bicycle" --contract "bicycle.shortest" --contract "bicycle.balanced" --contract "bicycle.networks" --contract "bicycle.genk" --contract "bicycle.relaxed" --write-routerdb staged.belgium.routerdb
-$IDP --read-pbf belgium-latest.osm.pbf --pr --create-routerdb vehicles=bicycle.lua --islands --elevation --write-routerdb staged.belgium.routerdb
+$IDP --read-pbf belgium-latest.osm.pbf --pr --create-routerdb vehicles=bicycle.lua --islands --elevation --contract "bicycle" --contract "bicycle.shortest" --contract "bicycle.balanced" --contract "bicycle.networks" --contract "bicycle.genk" --contract "bicycle.relaxed" --write-routerdb staged.belgium.routerdb
+# $IDP --read-pbf belgium-latest.osm.pbf --pr --create-routerdb vehicles=bicycle.lua --islands --elevation --write-routerdb staged.belgium.routerdb
 
 # The routerdb is first written to staged.belgium.routerdb
 # This is to prevent that the code sees a half-finished DB
